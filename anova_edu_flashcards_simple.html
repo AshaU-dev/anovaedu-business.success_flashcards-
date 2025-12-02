@@ -1,0 +1,247 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <title>Anova Edu Flashcards – Simple Flip</title>
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <style>
+    * {
+      box-sizing: border-box;
+    }
+    body {
+      margin: 0;
+      font-family: system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
+      background: #050509;
+      color: #f8f5ff;
+      min-height: 100vh;
+      display: flex;
+      flex-direction: column;
+    }
+    header {
+      display: flex;
+      align-items: center;
+      gap: 12px;
+      padding: 16px 24px;
+      border-bottom: 1px solid rgba(255, 255, 255, 0.08);
+      background: radial-gradient(circle at top left, rgba(255, 182, 193, 0.15), transparent 55%);
+    }
+    header img {
+      height: 40px;
+      width: auto;
+    }
+    header .title-block {
+      display: flex;
+      flex-direction: column;
+    }
+    header .title-block h1 {
+      margin: 0;
+      font-size: 1.25rem;
+      letter-spacing: 0.08em;
+      text-transform: uppercase;
+    }
+    header .title-block span {
+      font-size: 0.8rem;
+      opacity: 0.8;
+    }
+    main {
+      flex: 1;
+      padding: 24px;
+      max-width: 1100px;
+      width: 100%;
+      margin: 0 auto;
+    }
+    .controls {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 12px;
+      align-items: center;
+      margin-bottom: 24px;
+      font-size: 0.9rem;
+    }
+    .controls button {
+      border-radius: 999px;
+      border: 1px solid rgba(255, 255, 255, 0.15);
+      background: rgba(255, 255, 255, 0.02);
+      padding: 8px 16px;
+      color: inherit;
+      cursor: pointer;
+      transition: background 0.2s ease, transform 0.1s ease, box-shadow 0.2s ease;
+      font-size: 0.9rem;
+    }
+    .controls button:hover {
+      background: rgba(255, 255, 255, 0.08);
+      transform: translateY(-1px);
+      box-shadow: 0 6px 16px rgba(0,0,0,0.35);
+    }
+    .controls button:active {
+      transform: translateY(0);
+      box-shadow: none;
+    }
+    .controls .counter {
+      opacity: 0.8;
+    }
+
+    .grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(260px, 1fr));
+      gap: 18px;
+    }
+    .card {
+      position: relative;
+      width: 100%;
+      min-height: 160px;
+      border-radius: 18px;
+      padding: 16px 18px 22px;
+      box-shadow: 0 10px 25px rgba(0,0,0,0.5);
+      background: radial-gradient(circle at top left, rgba(255,192,203,0.06), rgba(103,58,183,0.3));
+      border: 1px solid rgba(255,255,255,0.08);
+      cursor: pointer;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      text-align: center;
+      font-size: 0.95rem;
+      line-height: 1.35;
+      transition: background 0.2s ease, transform 0.1s ease, box-shadow 0.2s ease;
+    }
+    .card:hover {
+      transform: translateY(-2px);
+      box-shadow: 0 14px 32px rgba(0,0,0,0.6);
+    }
+    .card[data-side="back"] {
+      background: radial-gradient(circle at bottom right, rgba(255,192,203,0.1), rgba(26,35,126,0.95));
+    }
+    .pill {
+      position: absolute;
+      top: 10px;
+      right: 12px;
+      padding: 3px 10px;
+      border-radius: 999px;
+      font-size: 0.7rem;
+      text-transform: uppercase;
+      letter-spacing: 0.08em;
+      background: rgba(0,0,0,0.35);
+      border: 1px solid rgba(255,255,255,0.18);
+    }
+    .hint-text {
+      margin-top: 8px;
+      font-size: 0.8rem;
+      opacity: 0.7;
+    }
+
+    @media (max-width: 600px) {
+      main {
+        padding: 16px;
+      }
+      header {
+        padding: 12px 16px;
+      }
+      .card {
+        min-height: 190px;
+      }
+    }
+  </style>
+</head>
+<body>
+  <header>
+    <img src="logo-transparent cropped.png" alt="Anova Edu Logo" />
+    <div class="title-block">
+      <h1>ANOVA EDU FLASHCARDS</h1>
+      <span>Systems, clarity & operational excellence</span>
+    </div>
+  </header>
+  <main>
+    <div class="controls">
+      <button id="shuffleBtn">Shuffle cards</button>
+      <button id="resetBtn">Reset order</button>
+      <span class="counter" id="counter"></span>
+    </div>
+    <div class="grid" id="cardGrid"></div>
+    <div class="hint-text">Tip: Click any card to toggle between question (Q) and answer (A).</div>
+  </main>
+
+  <script>
+    const originalCards = [
+  { front: "According to Anova Edu, what is the primary reason many organizations struggle?", back: "They are struggling because of poor systems, not because of their people." },
+  { front: "A key symptom of poor organizational systems is having ____ workflows.", back: "messy" },
+  { front: "What problem related to roles and duties is characteristic of an organization with poor systems?", back: "Unclear responsibilities." },
+  { front: "In an organization with poor systems, teams often have no time to think and are forced only to _____.", back: "react" },
+  { front: "Anova Edu&#x27;s philosophy states that when a team seems to be failing, it is actually the _____ that are failing them.", back: "systems" },
+  { front: "How do poor systems impact a team&#x27;s ability to innovate and generate new ideas?", back: "They kill creativity." },
+  { front: "What negative effect do poor systems have on a team&#x27;s output and efficiency?", back: "They kill productivity." },
+  { front: "Poor systems can hinder an organization&#x27;s ability to secure grants and other financial support, effectively killing _____ opportunities.", back: "funding" },
+  { front: "What is the cognitive consequence for team members working within poor systems?", back: "It kills mental bandwidth." },
+  { front: "What is the impact of poor systems on the collective motivation and spirit of a team?", back: "They kill team morale." },
+  { front: "Complete the Anova Edu principle: &quot;When everything feels urgent, nothing feels _____.&quot;", back: "strategic" },
+  { front: "According to Anova Edu, what capability is unlocked when clarity is established within a team?", back: "It frees the mind to innovate, imagine, and lead." },
+  { front: "Name one of the five key benefits a team gains when the right systems are in place.", back: "Focus, confidence, better decisions, faster execution, or space to grow." },
+  { front: "By implementing the right systems, teams can improve their ability to concentrate on key tasks, a benefit known as _____.", back: "focus" },
+  { front: "Effective systems can lead to faster completion of tasks and projects, also known as faster _____.", back: "execution" },
+  { front: "What does Anova Edu build to unlock a team&#x27;s brilliance?", back: "The workflows, clarity, and structure." },
+  { front: "What Anova Edu service focuses on improving efficiency by automating repetitive tasks and processes?", back: "Workflow Automation." },
+  { front: "Which Anova Edu service aims to strengthen an organization&#x27;s skills, resources, and abilities to meet its objectives?", back: "Capacity Building." },
+  { front: "What specialized service does Anova Edu offer for organizations that rely on external funding?", back: "Grant Management Systems." },
+  { front: "The Anova Edu service that focuses on ensuring roles, processes, and goals are well-defined and understood is called _____.", back: "Operational Clarity" },
+  { front: "Which Anova Edu service is designed to ensure all members of a group are working cohesively toward shared goals?", back: "Team Alignment." },
+  { front: "What is the website address for Anova Edu?", back: "www.anovaedu.org" },
+  { front: "What is the contact email for Anova Edu?", back: "info@anovaedu.org" }
+];
+    let cards = [...originalCards];
+
+    const grid = document.getElementById('cardGrid');
+    const counterEl = document.getElementById('counter');
+    const shuffleBtn = document.getElementById('shuffleBtn');
+    const resetBtn = document.getElementById('resetBtn');
+
+    function renderCards() {
+      grid.innerHTML = '';
+      cards.forEach((card, index) => {
+        const cardEl = document.createElement('div');
+        cardEl.className = 'card';
+        cardEl.dataset.index = index;
+        cardEl.dataset.side = 'front';
+
+        const pill = document.createElement('div');
+        pill.className = 'pill';
+        pill.textContent = 'Q';
+
+        const textEl = document.createElement('div');
+        textEl.innerHTML = card.front;
+
+        cardEl.appendChild(pill);
+        cardEl.appendChild(textEl);
+        grid.appendChild(cardEl);
+
+        cardEl.addEventListener('click', () => {
+          const side = cardEl.dataset.side === 'front' ? 'back' : 'front';
+          cardEl.dataset.side = side;
+          pill.textContent = side === 'front' ? 'Q' : 'A';
+          textEl.innerHTML = side === 'front' ? card.front : card.back;
+        });
+      });
+
+      counterEl.textContent = cards.length + ' cards loaded';
+    }
+
+    function shuffle(arr) {
+      for (let i = arr.length - 1; i > 0; i--) {
+        const j = Math.floor(Math.random() * (i + 1));
+        [arr[i], arr[j]] = [arr[j], arr[i]];
+      }
+    }
+
+    shuffleBtn.addEventListener('click', () => {
+      cards = [...cards];
+      shuffle(cards);
+      renderCards();
+    });
+
+    resetBtn.addEventListener('click', () => {
+      cards = [...originalCards];
+      renderCards();
+    });
+
+    renderCards();
+  </script>
+</body>
+</html>
